@@ -56,8 +56,12 @@ namespace Rhino.Security.Services
 			group.AllParents.AddAll(parent.AllParents);
 			group.AllParents.Add(parent);
 			parent.DirectChildren.Add(group);
-			parent.AllChildren.Add(group);
-			return group;
+            foreach(UsersGroup prnt in group.AllParents)
+            {
+                prnt.AllChildren.Add(group);
+            }
+
+		    return group;
 		}
 
         /// <summary>
