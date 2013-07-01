@@ -18,8 +18,9 @@ namespace Rhino.Security.Tests
             
 
             authorizationRepository.AssociateUserWith(user, "Child #49");
-            
+            group = authorizationRepository.GetUsersGroupByName("Root");
             UsersGroup[] groups = authorizationRepository.GetAncestryAssociation(user, "Root");
+            Assert.Equal(50, group.AllChildren.Count);
             Assert.Equal(51, groups.Length);
         }
 
