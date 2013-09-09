@@ -1,8 +1,6 @@
 ﻿using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
-using CommonServiceLocator.WindsorAdapter;
-using Microsoft.Practices.ServiceLocation;
 using Rhino.Security.Interfaces;
 using Rhino.Security.Services;
 
@@ -13,11 +11,12 @@ namespace Rhino.Security.Windsor
 	/// </summary>
 	public class RhinoSecurityInstaller : IWindsorInstaller
 	{
-	    /// <summary>
-	    /// Performs the installation in the <see cref="T:Castle.Windsor.IWindsorContainer"/>.
-	    /// </summary>
-	    /// <param name="container">The container.</param><param name="store">The configuration store.</param>
-	    public void Install(IWindsorContainer container, IConfigurationStore store)
+		/// <summary>
+		/// Install the services needed for Rhino Security to work properly with Windsor.
+		/// </summary>
+		/// <param name="container">The container.</param>
+		/// <param name="store">The configuration store.</param>
+		public void Install(IWindsorContainer container, IConfigurationStore store)
 		{
 			container.Register(
 				Component.For<IAuthorizationService>()
@@ -33,8 +32,6 @@ namespace Rhino.Security.Windsor
 					.ImplementedBy<PermissionsService>()
 					.LifeStyle.Transient
 				);
-
-			ServiceLocator.SetLocatorProvider(() => new WindsorServiceLocator(container));
 		}
 	}
 }
