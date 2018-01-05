@@ -1,6 +1,6 @@
 using System;
 using System.Data.SQLite;
-using Microsoft.Practices.ServiceLocation;
+using CommonServiceLocator;
 using NHibernate;
 using NHibernate.Cache;
 using NHibernate.Cfg;
@@ -13,7 +13,7 @@ using Environment = NHibernate.Cfg.Environment;
 
 namespace Rhino.Security.Tests
 {
-	public abstract class DatabaseFixture : IDisposable
+    public abstract class DatabaseFixture : IDisposable
 	{
 		protected readonly ISessionFactory factory;
 		protected Account account;
