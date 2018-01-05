@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using Microsoft.Practices.ServiceLocation;
 using Rhino.Security.Interfaces;
