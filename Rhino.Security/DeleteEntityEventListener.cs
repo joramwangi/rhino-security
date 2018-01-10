@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Event;
@@ -14,7 +16,13 @@ namespace Rhino.Security
 	[Serializable]
 	public class DeleteEntityEventListener : IPreDeleteEventListener
 	{
-		/// <summary>
+	    /// <inheritdoc />
+	    public Task<bool> OnPreDeleteAsync(PreDeleteEvent @event, CancellationToken cancellationToken)
+	    {
+	        throw new NotImplementedException();
+	    }
+
+	    /// <summary>
 		/// Handles PreDelete event to delete an entity's associated security data.
 		/// </summary>
 		/// <param name="deleteEvent">Event object containing the delete operation information.</param>
@@ -32,14 +40,18 @@ namespace Rhino.Security
 
 				if (entityReference != null)
 				{
-					ISession childSession = deleteEvent.Session.GetSession(EntityMode.Poco);
-					
-					// because default flush mode is auto, a read after a scheduled delete will invoke
-					// the auto-flush behaviour, causing a constraint violation exception in the 
-					// underlying database, because there still are EntityGroup entities that need
-					// the deleted EntityReference/SecurityKey.
-					childSession.FlushMode = FlushMode.Commit;
+                    ISession childSession = deleteEvent.Session.SessionWithOptions()
+                        .Connection()
+                        .ConnectionReleaseMode()
+                        .FlushMode()
+                        .Interceptor()
+                        .OpenSession();
 
+                    // because default flush mode is auto, a read after a scheduled delete will invoke
+                    // the auto-flush behaviour, causing a constraint violation exception in the 
+                    // underlying database, because there still are EntityGroup entities that need
+                    // the deleted EntityReference/SecurityKey.
+                    childSession.FlushMode = FlushMode.Commit;
 					childSession.Delete(entityReference);
 
 					//Also remove EntityReferencesToEntitiesGroups and Permissions that reference this entity

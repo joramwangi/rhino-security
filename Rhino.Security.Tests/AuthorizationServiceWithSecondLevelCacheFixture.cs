@@ -1,6 +1,5 @@
-using System;
 using System.IO;
-using Microsoft.Practices.ServiceLocation;
+using CommonServiceLocator;
 using Rhino.Security.Interfaces;
 using Rhino.Security.Model;
 using Xunit;
@@ -27,18 +26,6 @@ namespace Rhino.Security.Tests
         {
             if (File.Exists("test.db"))
                 File.Delete("test.db");
-        }
-
-        public AuthorizationServiceWithSecondLevelCacheFixture()
-        {
-            User.DisableEqualityOverrides = true;
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            User.DisableEqualityOverrides = false;
         }
 
         [Fact]
@@ -82,12 +69,7 @@ namespace Rhino.Security.Tests
                 // should return true since it loads from cache
                 SillyContainer.SessionProvider = () => s3;
                 var anotherAuthorizationService = ServiceLocator.Current.GetInstance<IAuthorizationService>();
-
-                // Get fresh user to ensure that code works also when IUser implementation have no proper Equals/GetHashCode overrides.
-                // In such case for example Restrictions.Eq("user", user) results in second level cache miss,
-                // but Restrictions.Eq("user.id", user.SecurityInfo.Identifier) works ok.
-                var freshUser = s3.Get<User>(user.Id);
-                Assert.True(anotherAuthorizationService.IsAllowed(freshUser, account, "/Account/Edit"));
+                Assert.True(anotherAuthorizationService.IsAllowed(user, account, "/Account/Edit"));
 
                 s3.Transaction.Commit();
             }
@@ -102,7 +84,7 @@ namespace Rhino.Security.Tests
             session.Flush();
             session.Transaction.Commit();
             session.Dispose();
-
+            
             using (var s1 = factory.OpenSession())
             using (var tx = s1.BeginTransaction())
             {
@@ -130,7 +112,7 @@ namespace Rhino.Security.Tests
                 SillyContainer.SessionProvider = () => s3;
                 var anotherAuthorizationRepository = ServiceLocator.Current.GetInstance<IAuthorizationRepository>();
                 UsersGroup[] newGroups = anotherAuthorizationRepository.GetAssociatedUsersGroupFor(user);
-                Assert.Equal(1, newGroups.Length);
+                Assert.Single(newGroups);
                 Assert.Equal("Administrators", newGroups[0].Name);
                 tx.Commit();
             }
