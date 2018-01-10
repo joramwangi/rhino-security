@@ -40,14 +40,18 @@ namespace Rhino.Security
 
 				if (entityReference != null)
 				{
-					ISession childSession = deleteEvent.Session.SessionWithOptions().OpenSession();
-					
-					// because default flush mode is auto, a read after a scheduled delete will invoke
-					// the auto-flush behaviour, causing a constraint violation exception in the 
-					// underlying database, because there still are EntityGroup entities that need
-					// the deleted EntityReference/SecurityKey.
-					childSession.FlushMode = FlushMode.Commit;
+                    ISession childSession = deleteEvent.Session.SessionWithOptions()
+                        .Connection()
+                        .ConnectionReleaseMode()
+                        .FlushMode()
+                        .Interceptor()
+                        .OpenSession();
 
+                    // because default flush mode is auto, a read after a scheduled delete will invoke
+                    // the auto-flush behaviour, causing a constraint violation exception in the 
+                    // underlying database, because there still are EntityGroup entities that need
+                    // the deleted EntityReference/SecurityKey.
+                    childSession.FlushMode = FlushMode.Commit;
 					childSession.Delete(entityReference);
 
 					//Also remove EntityReferencesToEntitiesGroups and Permissions that reference this entity
