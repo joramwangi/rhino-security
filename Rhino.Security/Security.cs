@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.Practices.ServiceLocation;
+using CommonServiceLocator;
 using NHibernate.Cfg;
 using NHibernate.Event;
 using Rhino.Security.Impl;
@@ -10,10 +10,10 @@ using Rhino.Security.Interfaces;
 
 namespace Rhino.Security
 {
-	/// <summary>
-	/// This class allows to configure the security system
-	/// </summary>
-	public class Security
+    /// <summary>
+    /// This class allows to configure the security system
+    /// </summary>
+    public class Security
 	{
 		private static readonly MethodInfo getSecurityKeyMethod = typeof (Security).GetMethod(
 			"GetSecurityKeyPropertyInternal", BindingFlags.NonPublic | BindingFlags.Static);
